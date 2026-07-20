@@ -2879,22 +2879,46 @@ installInstagramDelegatedHandler();
  document.querySelectorAll('[data-story-theme]').forEach(b=>b.onclick=()=>{shareTheme=b.dataset.storyTheme;document.querySelectorAll('[data-story-theme]').forEach(x=>x.classList.toggle('active',x===b))});
  function rr(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r)}
  function font(sz,w=800){return `${w} ${sz}px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif`}
- function pill(c,x,y,text,bg,fg='#fff',dot=''){c.font=font(24,900);const pad=22,dotSpace=dot?28:0,w=c.measureText(text).width+pad*2+dotSpace,h=48;rr(c,x,y,w,h,24);c.fillStyle=bg;c.fill();c.strokeStyle='rgba(255,255,255,.22)';c.lineWidth=1;c.stroke();if(dot){c.fillStyle=dot;c.beginPath();c.arc(x+20,y+24,7,0,Math.PI*2);c.fill()}c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';c.fillText(text,x+w/2+dotSpace/2,y+h/2+1);c.textBaseline='alphabetic';return w}
+ function pill(c,x,y,text,bg,fg='#fff',dot=''){c.font=font(28,900);const pad=25,dotSpace=dot?34:0,w=c.measureText(text).width+pad*2+dotSpace,h=56;rr(c,x,y,w,h,28);c.fillStyle=bg;c.fill();c.strokeStyle='rgba(255,255,255,.24)';c.lineWidth=1.2;c.stroke();if(dot){c.fillStyle=dot;c.beginPath();c.arc(x+23,y+28,8,0,Math.PI*2);c.fill()}c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';c.fillText(text,x+w/2+dotSpace/2,y+h/2+1);c.textBaseline='alphabetic';return w}
  async function brand(c,x,y,dark){const logo=await igImg(data.settings.logoUrl||'');if(logo){const h=54,w=Math.min(230,logo.width/logo.height*h);c.drawImage(logo,x,y-h+8,w,h);return w}const name=data.settings.logoText||'teraz';c.font=font(48,950);c.fillStyle=dark?'#fff':'#111';c.textAlign='left';c.fillText(name,x,y);const tw=c.measureText(name).width;c.fillStyle=data.settings.primaryColor||'#e52329';c.beginPath();c.arc(x+tw+12,y-11,6,0,Math.PI*2);c.fill();return tw+22}
  async function makeShareStory(post,theme){
    const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1920;const c=canvas.getContext('2d'),dark=theme==='dark';
    c.fillStyle=dark?'#080b11':'#f2f3f6';c.fillRect(0,0,1080,1920);
-   const cardX=64,cardY=190,cardW=952,cardH=1515,rad=42;rr(c,cardX,cardY,cardW,cardH,rad);c.save();c.clip();c.fillStyle=dark?'#111722':'#fff';c.fillRect(cardX,cardY,cardW,cardH);
-   const img=await igImg(post.image||'');const imageH=730;if(img){const scale=Math.max(cardW/img.width,imageH/img.height),sw=cardW/scale,sh=imageH/scale;c.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,cardX,cardY,cardW,imageH)}else{const g=c.createLinearGradient(cardX,cardY,cardX+cardW,cardY+imageH);g.addColorStop(0,'#17365d');g.addColorStop(1,data.settings.primaryColor||'#e52329');c.fillStyle=g;c.fillRect(cardX,cardY,cardW,imageH)}
-   const grad=c.createLinearGradient(0,cardY+imageH-270,0,cardY+imageH+190);grad.addColorStop(0,'rgba(255,255,255,0)');grad.addColorStop(.58,dark?'rgba(17,23,34,.88)':'rgba(255,255,255,.88)');grad.addColorStop(1,dark?'#111722':'#fff');c.fillStyle=grad;c.fillRect(cardX,cardY+imageH-280,cardW,490);c.restore();
+   const cardX=64,cardY=170,cardW=952,cardH=1550,rad=42;rr(c,cardX,cardY,cardW,cardH,rad);c.save();c.clip();c.fillStyle=dark?'#111722':'#fff';c.fillRect(cardX,cardY,cardW,cardH);
+   const img=await igImg(post.image||''),imageH=800;
+   if(img){
+     const scale=Math.max(cardW/img.width,imageH/img.height),sw=cardW/scale,sh=imageH/scale;
+     c.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,cardX,cardY,cardW,imageH+8);
+   }else{
+     const g=c.createLinearGradient(cardX,cardY,cardX+cardW,cardY+imageH);
+     g.addColorStop(0,'#17365d');g.addColorStop(.56,'#101c31');g.addColorStop(1,data.settings.primaryColor||'#e52329');
+     c.fillStyle=g;c.fillRect(cardX,cardY,cardW,imageH+8);
+     c.save();c.globalAlpha=.14;c.strokeStyle='#b9c9e5';c.lineWidth=2;
+     for(let yy=cardY-40;yy<cardY+imageH+120;yy+=92){c.beginPath();c.moveTo(cardX-80,yy);c.lineTo(cardX+cardW+100,yy-150);c.stroke()}
+     c.restore();
+   }
+   /* Plynulý prechod bez viditeľnej hrany fotografie. Gradient výrazne prekrýva spodok obrázka. */
+   const gradTop=cardY+imageH-390,gradBottom=cardY+imageH+250;
+   const grad=c.createLinearGradient(0,gradTop,0,gradBottom);
+   grad.addColorStop(0,'rgba(255,255,255,0)');
+   grad.addColorStop(.34,dark?'rgba(17,23,34,.10)':'rgba(255,255,255,.10)');
+   grad.addColorStop(.68,dark?'rgba(17,23,34,.94)':'rgba(255,255,255,.94)');
+   grad.addColorStop(1,dark?'#111722':'#fff');
+   c.fillStyle=grad;c.fillRect(cardX,gradTop-4,cardW,gradBottom-gradTop+12);
+   c.restore();
    c.shadowColor='rgba(0,0,0,.18)';c.shadowBlur=34;c.shadowOffsetY=14;rr(c,cardX,cardY,cardW,cardH,rad);c.strokeStyle='rgba(255,255,255,.12)';c.lineWidth=1;c.stroke();c.shadowColor='transparent';
-   const x=112,maxW=856,fg=dark?'#fff':'#101216',muted=dark?'rgba(255,255,255,.68)':'#717680';let y=850;
-   if(post.breaking||post.important){const label=post.breaking?'MIMORIADNE':'DÔLEŽITÉ',dot=post.breaking?'#e52329':'#f3a61f';pill(c,x,y,label,dark?'rgba(255,255,255,.12)':'rgba(30,36,48,.10)',fg,dot);y+=82}
-   c.fillStyle=fg;c.font=font(58,950);c.textAlign='left';const titleLines=igLines(c,post.title,maxW,5);titleLines.forEach((line,i)=>c.fillText(line,x,y+i*66));y+=titleLines.length*66+26;
-   c.fillStyle=muted;c.font=font(31,600);const bodyLines=igLines(c,post.body||'',maxW,3);bodyLines.forEach((line,i)=>c.fillText(line,x,y+i*43));y+=bodyLines.length*43+30;
-   const dt=new Intl.DateTimeFormat('sk-SK',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(post.createdAt));c.fillStyle=muted;c.font=font(27,750);c.fillText(dt,x,y);y+=45;
-   const cat=catById(post.categoryId)||{name:'Správy',color:data.settings.primaryColor||'#e52329'};let px=x;px+=pill(c,px,y,cat.name,cat.color,'#fff')+12;(post.tagIds||[]).map(tagById).filter(Boolean).slice(0,4).forEach(t=>{const pw=pill(c,px,y,'#'+t.name,dark?'rgba(255,255,255,.12)':'rgba(20,28,42,.09)',fg);px+=pw+10});
-   const by=1635;await brand(c,x,by,dark);c.fillStyle=muted;c.font=font(25,800);c.textAlign='right';c.fillText(data.settings.shareStoryFooterText||'www.teraz.sk',968,by);c.textAlign='left';return canvas;
+   const x=112,maxW=856,fg=dark?'#fff':'#101216',muted=dark?'rgba(255,255,255,.72)':'#686f7b';let y=825;
+   if(post.breaking||post.important){
+     const label=post.breaking?'MIMORIADNE':'DÔLEŽITÉ',dot=post.breaking?'#e52329':'#f3a61f';
+     pill(c,x,y,label,dark?'rgba(255,255,255,.13)':'rgba(30,36,48,.11)',fg,dot);
+     y+=112;
+   }
+   c.fillStyle=fg;c.font=font(64,950);c.textAlign='left';const titleLines=igLines(c,post.title,maxW,5);titleLines.forEach((line,i)=>c.fillText(line,x,y+i*72));y+=titleLines.length*72+36;
+   c.fillStyle=muted;c.font=font(35,600);const bodyLines=igLines(c,post.body||'',maxW,3);bodyLines.forEach((line,i)=>c.fillText(line,x,y+i*49));y+=bodyLines.length*49+38;
+   const dt=new Intl.DateTimeFormat('sk-SK',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(post.createdAt));c.fillStyle=muted;c.font=font(31,760);c.fillText(dt,x,y);y+=54;
+   const cat=catById(post.categoryId)||{name:'Správy',color:data.settings.primaryColor||'#e52329'};let px=x;px+=pill(c,px,y,cat.name,cat.color,'#fff')+14;
+   (post.tagIds||[]).map(tagById).filter(Boolean).slice(0,4).forEach(t=>{const pw=pill(c,px,y,'#'+t.name,dark?'rgba(255,255,255,.13)':'rgba(20,28,42,.10)',fg);px+=pw+12});
+   const by=1652;await brand(c,x,by,dark);c.fillStyle=muted;c.font=font(27,800);c.textAlign='right';c.fillText(data.settings.shareStoryFooterText||'www.teraz.sk',968,by);c.textAlign='left';return canvas;
  }
  async function shareStory(){if(!sharePostId)return;const post=data.posts.find(x=>x.id===sharePostId);if(!post)return;toast('Pripravujem obrázok…');const canvas=await makeShareStory(post,shareTheme),blob=await new Promise(r=>canvas.toBlob(r,'image/png',.96)),file=new File([blob],`story-${post.id}-${shareTheme}.png`,{type:'image/png'});try{if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:post.title,text:`${post.title}
 ${postUrl(post.id)}`});toast('Obrázok je pripravený na zdieľanie')}else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);toast('Story obrázok bol stiahnutý')}}catch(err){if(err?.name!=='AbortError')toast('Zdieľanie sa nepodarilo')}}
