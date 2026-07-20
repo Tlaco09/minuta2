@@ -2852,11 +2852,11 @@ installInstagramDelegatedHandler();
     });return y+4*(cellH+12)
   }
   async function drawElections(format,canvas){
-    const {w,h,c,p,primary}=await setup('elections',format,canvas),e=data.elections||{},all=[...(e.parties||[])].sort((a,b)=>Number(b.percent)-Number(a.percent)),parties=all.slice(0,10),story=format==='story',contentW=w-p*2;let y=h*(story?.23:.17);
+    const {w,h,c,p,primary}=await setup('elections',format,canvas),e=data.elections||{},all=[...(e.parties||[])].sort((a,b)=>Number(b.percent)-Number(a.percent)),parties=all.slice(0,10),story=format==='story',contentW=w-p*2;let y=(e.type==='local'&&!story)?h*.115:h*(story?.23:.17);
     c.textAlign='left';c.font=F(22,900);const kw=c.measureText(e.kicker||'VOĽBY').width+44;round(c,p,y,kw,48,24);c.fillStyle='rgba(255,255,255,.14)';c.fill();c.strokeStyle='rgba(255,255,255,.22)';c.stroke();c.fillStyle='#fff';c.fillText(e.kicker||'VOĽBY',p+22,y+32);y+=116;
     c.font=F(story?55:49,900);const title=igLines(c,e.title||'Volebné výsledky',contentW,3);title.forEach((l,i)=>c.fillText(l,p,y+i*(story?59:53)));y+=title.length*(story?59:53)+28;
     c.fillStyle='rgba(255,255,255,.64)';c.font=F(19,800);c.fillText('SČÍTANÉ',p,y);c.fillText('ÚČASŤ',p+250,y);c.fillStyle='#fff';c.font=F(31,900);c.fillText(`${Number(e.counted||0).toFixed(1)} %`,p,y+38);c.fillText(`${Number(e.turnout||0).toFixed(1)} %`,p+250,y+38);y+=84;
-    if(e.type==='local'){drawLocal(c,e,w,h,p,y-(story?0:54),story)}
+    if(e.type==='local'){drawLocal(c,e,w,h,p,story?y:y-20,story)}
     else if(e.type==='president2'){const a=parties[0],b=parties[1],sum=Math.max(Number(a?.percent||0)+Number(b?.percent||0),1),share=Number(a?.percent||0)/sum,rad=story?170:140,cx=w/2,cy=y+rad+165,photoR=story?64:54,ai=await igImg(a?.logo||''),bi=await igImg(b?.logo||'');
       const photo=(img,x,yy,color)=>{c.save();c.beginPath();c.arc(x,yy,photoR,0,Math.PI*2);c.clip();if(img)c.drawImage(img,x-photoR,yy-photoR,photoR*2,photoR*2);else{c.fillStyle=color||'#777';c.fillRect(x-photoR,yy-photoR,photoR*2,photoR*2)}c.restore();c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=3;c.beginPath();c.arc(x,yy,photoR,0,Math.PI*2);c.stroke()};
       photo(ai,p+photoR,y+72,a?.color);photo(bi,w-p-photoR,y+72,b?.color);c.fillStyle='#fff';c.textAlign='left';c.font=F(story?28:24,900);c.fillText(a?.name||'Kandidát',p,y+174);c.font=F(story?36:31,900);c.fillText(`${Number(a?.percent||0).toFixed(1)} %`,p,y+216);c.textAlign='right';c.font=F(story?28:24,900);c.fillText(b?.name||'Kandidát',w-p,y+174);c.font=F(story?36:31,900);c.fillText(`${Number(b?.percent||0).toFixed(1)} %`,w-p,y+216);
