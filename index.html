@@ -2885,29 +2885,35 @@ installInstagramDelegatedHandler();
    const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1920;const c=canvas.getContext('2d'),dark=theme==='dark';
    c.fillStyle=dark?'#080b11':'#f2f3f6';c.fillRect(0,0,1080,1920);
    const cardX=64,cardY=170,cardW=952,cardH=1550,rad=42;rr(c,cardX,cardY,cardW,cardH,rad);c.save();c.clip();c.fillStyle=dark?'#111722':'#fff';c.fillRect(cardX,cardY,cardW,cardH);
-   const img=await igImg(post.image||''),imageH=800;
+   /* Obrázok pokračuje hlboko pod prechod, takže sa nikdy neukáže jeho ostrý spodný okraj. */
+   const img=await igImg(post.image||''),imageH=1110;
    if(img){
      const scale=Math.max(cardW/img.width,imageH/img.height),sw=cardW/scale,sh=imageH/scale;
-     c.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,cardX,cardY,cardW,imageH+8);
+     c.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,cardX,cardY,cardW,imageH);
    }else{
      const g=c.createLinearGradient(cardX,cardY,cardX+cardW,cardY+imageH);
      g.addColorStop(0,'#17365d');g.addColorStop(.56,'#101c31');g.addColorStop(1,data.settings.primaryColor||'#e52329');
-     c.fillStyle=g;c.fillRect(cardX,cardY,cardW,imageH+8);
+     c.fillStyle=g;c.fillRect(cardX,cardY,cardW,imageH);
      c.save();c.globalAlpha=.14;c.strokeStyle='#b9c9e5';c.lineWidth=2;
      for(let yy=cardY-40;yy<cardY+imageH+120;yy+=92){c.beginPath();c.moveTo(cardX-80,yy);c.lineTo(cardX+cardW+100,yy-150);c.stroke()}
      c.restore();
    }
-   /* Plynulý prechod bez viditeľnej hrany fotografie. Gradient výrazne prekrýva spodok obrázka. */
-   const gradTop=cardY+imageH-390,gradBottom=cardY+imageH+250;
+   /* Dlhý viacbodový prechod: najprv fotografia jemne tmavne/svetlie, potom plynulo prejde do plnej farby karty. */
+   const gradTop=cardY+360,gradBottom=cardY+1080;
+   const cardColor=dark?'17,23,34':'255,255,255';
    const grad=c.createLinearGradient(0,gradTop,0,gradBottom);
-   grad.addColorStop(0,'rgba(255,255,255,0)');
-   grad.addColorStop(.34,dark?'rgba(17,23,34,.10)':'rgba(255,255,255,.10)');
-   grad.addColorStop(.68,dark?'rgba(17,23,34,.94)':'rgba(255,255,255,.94)');
-   grad.addColorStop(1,dark?'#111722':'#fff');
-   c.fillStyle=grad;c.fillRect(cardX,gradTop-4,cardW,gradBottom-gradTop+12);
+   grad.addColorStop(0,`rgba(${cardColor},0)`);
+   grad.addColorStop(.22,`rgba(${cardColor},.05)`);
+   grad.addColorStop(.43,`rgba(${cardColor},.20)`);
+   grad.addColorStop(.61,`rgba(${cardColor},.52)`);
+   grad.addColorStop(.78,`rgba(${cardColor},.86)`);
+   grad.addColorStop(.91,`rgba(${cardColor},.98)`);
+   grad.addColorStop(1,`rgb(${cardColor})`);
+   c.fillStyle=grad;c.fillRect(cardX,gradTop,cardW,gradBottom-gradTop+3);
+   c.fillStyle=dark?'#111722':'#fff';c.fillRect(cardX,gradBottom,cardW,cardY+cardH-gradBottom);
    c.restore();
    c.shadowColor='rgba(0,0,0,.18)';c.shadowBlur=34;c.shadowOffsetY=14;rr(c,cardX,cardY,cardW,cardH,rad);c.strokeStyle='rgba(255,255,255,.12)';c.lineWidth=1;c.stroke();c.shadowColor='transparent';
-   const x=112,maxW=856,fg=dark?'#fff':'#101216',muted=dark?'rgba(255,255,255,.72)':'#686f7b';let y=825;
+   const x=112,maxW=856,fg=dark?'#fff':'#101216',muted=dark?'rgba(255,255,255,.72)':'#686f7b';let y=1015;
    if(post.breaking||post.important){
      const label=post.breaking?'MIMORIADNE':'DÔLEŽITÉ',dot=post.breaking?'#e52329':'#f3a61f';
      pill(c,x,y,label,dark?'rgba(255,255,255,.13)':'rgba(30,36,48,.11)',fg,dot);
